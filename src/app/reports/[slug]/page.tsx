@@ -6,7 +6,7 @@ import { BotIcon, UserIcon } from '@/components/custom/icons'
 import { Markdown } from '@/components/custom/markdown'
 import { Button } from '@/components/ui/button'
 import { ArrowLeft } from 'lucide-react'
-import { redirect } from 'next/navigation'
+import { redirect, useParams } from 'next/navigation'
 
 // Mock function to simulate fetching data from the backend
 const fetchDataFromBackend = async (query: string) => {
@@ -18,7 +18,10 @@ const fetchDataFromBackend = async (query: string) => {
   }
 }
 
-export default function Page({ query = 'I want to buy Macbook Air M2 chip 512GB for $2000, is it a reasonable price for such product?' }: { query: string }) {
+export default function Page() {
+  const { slug } = useParams() // Now, slug is a Promise
+  const query = slug || 'Default query' // Default value for fallback
+
   const [data, setData] = useState<{ query: string; response: string } | null>(null)
   const [isLoading, setIsLoading] = useState(true)
 
@@ -30,11 +33,13 @@ export default function Page({ query = 'I want to buy Macbook Air M2 chip 512GB 
       setIsLoading(false)
     }
 
-    fetchData()
-  }, [query])
+    if (slug) {
+      fetchData()
+    }
+  }, [query, slug])
 
   const handleGoBack = () => {
-    redirect("/")
+    redirect('/')
   }
 
   return (

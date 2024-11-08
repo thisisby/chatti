@@ -161,9 +161,10 @@ export default function Home() {
 
     setTimeout(() => {
       setIsLoadingg(false)
+      redirect("/reports/1")
     }, 3000)
 
-    redirect("/reports/1")
+  
   }
 
   return (
