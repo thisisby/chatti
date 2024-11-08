@@ -349,6 +349,11 @@ export default function Home() {
               value={input}
               onChange={handleInputChange}
               onPaste={handlePaste}
+              onKeyDown={(event) => {
+                if (event.key === "Enter") {
+                  inputRef.current?.blur(); // Close keyboard when Return is pressed
+                }
+              }}
             />
            <button className='sm:hidden' type='submit'> <ArrowUpIcon /></button>
           </div>
