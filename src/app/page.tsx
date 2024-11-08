@@ -1,101 +1,356 @@
-import Image from "next/image";
+
+"use client";
+import { redirect } from 'next/navigation'
+
+import {
+  AttachmentIcon,
+  BotIcon,
+  UserIcon,
+  VercelIcon,
+} from "@/components/custom/icons";
+import { useChat } from "ai/react";
+import { DragEvent, useEffect, useRef, useState, FormEvent } from "react";
+import { AnimatePresence, motion } from "framer-motion";
+import { toast } from "sonner";
+import Link from "next/link";
+import { Markdown } from "@/components/custom/markdown";
+
+type FileOptions = {
+  experimental_attachments?: FileList | null;
+};
+
+const getTextFromDataUrl = (dataUrl: string) => {
+  const base64 = dataUrl.split(",")[1];
+  return window.atob(base64);
+};
+
+function TextFilePreview({ file }: { file: File }) {
+  const [content, setContent] = useState<string>("");
+
+  useEffect(() => {
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      const text = e.target?.result;
+      setContent(typeof text === "string" ? text.slice(0, 100) : "");
+    };
+    reader.readAsText(file);
+  }, [file]);
+
+  return (
+    <div>
+      {content}
+      {content.length >= 100 && "..."}
+    </div>
+  );
+}
 
 export default function Home() {
-  return (
-    <div className="grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20 font-[family-name:var(--font-geist-sans)]">
-      <main className="flex flex-col gap-8 row-start-2 items-center sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={180}
-          height={38}
-          priority
-        />
-        <ol className="list-inside list-decimal text-sm text-center sm:text-left font-[family-name:var(--font-geist-mono)]">
-          <li className="mb-2">
-            Get started by editing{" "}
-            <code className="bg-black/[.05] dark:bg-white/[.06] px-1 py-0.5 rounded font-semibold">
-              src/app/page.tsx
-            </code>
-            .
-          </li>
-          <li>Save and see your changes instantly.</li>
-        </ol>
 
-        <div className="flex gap-4 items-center flex-col sm:flex-row">
-          <a
-            className="rounded-full border border-solid border-transparent transition-colors flex items-center justify-center bg-foreground text-background gap-2 hover:bg-[#383838] dark:hover:bg-[#ccc] text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
+  
+
+  const { messages, input, handleSubmist, handleInputChange, isLoadingg } =
+    useChat({
+      onError: () =>
+        toast.error("You've been rate limited, please try again later!"),
+    });
+
+  const [files, setFiles] = useState<FileList | null>(null);
+  const inputRef = useRef<HTMLInputElement>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null); // Reference for the hidden file input
+  const [isDragging, setIsDragging] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
+  const [trigger, setTrigger] = useState(false);
+
+  const handlePaste = (event: React.ClipboardEvent) => {
+    const items = event.clipboardData?.items;
+
+    if (items) {
+      const files = Array.from(items)
+        .map((item) => item.getAsFile())
+        .filter((file): file is File => file !== null);
+
+      if (files.length > 0) {
+        const validFiles = files.filter(
+          (file) =>
+            file.type.startsWith("image/") || file.type.startsWith("text/")
+        );
+
+        if (validFiles.length === files.length) {
+          const dataTransfer = new DataTransfer();
+          validFiles.forEach((file) => dataTransfer.items.add(file));
+          setFiles(dataTransfer.files);
+        } else {
+          toast.error("Only image and text files are allowed");
+        }
+      }
+    }
+  };
+
+  const handleDragOver = (event: DragEvent<HTMLDivElement>) => {
+    event.preventDefault();
+    setIsDragging(true);
+  };
+
+  const handleDragLeave = (event: DragEvent<HTMLDivElement>) => {
+    event.preventDefault();
+    setIsDragging(false);
+  };
+
+  const handleDrop = (event: DragEvent<HTMLDivElement>) => {
+    event.preventDefault();
+    const droppedFiles = event.dataTransfer.files;
+    const droppedFilesArray = Array.from(droppedFiles);
+    if (droppedFilesArray.length > 0) {
+      const validFiles = droppedFilesArray.filter(
+        (file) =>
+          file.type.startsWith("image/") || file.type.startsWith("text/")
+      );
+
+      if (validFiles.length === droppedFilesArray.length) {
+        const dataTransfer = new DataTransfer();
+        validFiles.forEach((file) => dataTransfer.items.add(file));
+        setFiles(dataTransfer.files);
+      } else {
+        toast.error("Only image and text files are allowed!");
+      }
+
+      setFiles(droppedFiles);
+    }
+    setIsDragging(false);
+  };
+
+  const messagesEndRef = useRef<HTMLDivElement>(null);
+
+  const scrollToBottom = () => {
+    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+  };
+
+  useEffect(() => {
+    scrollToBottom();
+  }, [messages]);
+
+  // Function to handle file selection via the upload button
+  const handleUploadClick = () => {
+    fileInputRef.current?.click();
+  };
+
+  // Function to handle files selected from the file dialog
+  const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const selectedFiles = event.target.files;
+    if (selectedFiles) {
+      const validFiles = Array.from(selectedFiles).filter(
+        (file) =>
+          file.type.startsWith("image/") || file.type.startsWith("text/")
+      );
+
+      if (validFiles.length === selectedFiles.length) {
+        const dataTransfer = new DataTransfer();
+        validFiles.forEach((file) => dataTransfer.items.add(file));
+        setFiles(dataTransfer.files);
+      } else {
+        toast.error("Only image and text files are allowed");
+      }
+    }
+  };
+
+
+  const handleSubmit = (event: FormEvent, options: FileOptions) => {
+    event.preventDefault();
+    setTrigger(true)
+    setIsLoading(true)
+
+    setTimeout(() => {
+      setIsLoading(false)
+    }, 3000)
+
+    redirect("/reports/1")
+  }
+
+  return (
+    <div
+      className="flex flex-row justify-center pb-10 h-dvh bg-white dark:bg-zinc-900 relative"
+      onDragOver={handleDragOver}
+      onDragLeave={handleDragLeave}
+      onDrop={handleDrop}
+    >
+
+      <div className="absolute left-10 top-16">
+
+      </div>
+      <AnimatePresence>
+        {isDragging && (
+          <motion.div
+            className="fixed pointer-events-none dark:bg-zinc-900/90 h-dvh w-dvw z-10 flex flex-row justify-center items-center flex flex-col gap-1 bg-zinc-100/90"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
           >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={20}
-              height={20}
+            <div>Drag and drop files here</div>
+            <div className="text-sm dark:text-zinc-400 text-zinc-500">
+              {"(images and text)"}
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      <div className="flex flex-col justify-between gap-4">
+        {trigger ? (
+          <div className="flex flex-col gap-2 h-full w-dvw items-center overflow-y-scroll">
+            {messages.map((message, index) => (
+              <motion.div
+                key={message.id}
+                className={`flex flex-row gap-2 px-4 w-full md:w-[500px] md:px-0 ${
+                  index === 0 ? "pt-20" : ""
+                }`}
+                initial={{ y: 5, opacity: 0 }}
+                animate={{ y: 0, opacity: 1 }}
+              >
+                <div className="size-[24px] flex flex-col justify-center items-center flex-shrink-0 text-zinc-400">
+                  <BotIcon /> 
+                </div>
+
+                <div className="flex flex-col gap-1">
+                  <div className="text-zinc-800 dark:text-zinc-300 flex flex-col gap-4">
+                    <Markdown>{message.content}</Markdown>
+                  </div>
+                  <div className="flex flex-row gap-2">
+            
+                        <div className="text-xs w-40 h-24 overflow-hidden text-zinc-400 border p-2 rounded-md dark:bg-zinc-800 dark:border-zinc-700 mb-3">
+                
+                        </div>
+                   
+                  </div>
+                </div>
+              </motion.div>
+            ))}
+
+            {isLoading && (
+              <div className="flex flex-row gap-2 px-4 w-full md:w-[500px] md:px-0 pt-20">
+                <div className="size-[24px] flex flex-col justify-center items-center flex-shrink-0 text-zinc-400">
+                  <BotIcon />
+                </div>
+                <div className="flex flex-col gap-1 text-zinc-400">
+                  <div>hmm...</div>
+                </div>
+              </div>
+            )}
+
+            <div ref={messagesEndRef} />
+          </div>
+        ) : (
+          <motion.div className="h-[350px] px-4 w-full md:w-[500px] md:px-0 pt-20">
+            <div className="border rounded-lg p-6 flex flex-col gap-4 text-zinc-500 text-sm dark:text-zinc-400 dark:border-zinc-700">
+              <p className="flex flex-row justify-center gap-4 items-center text-zinc-900 dark:text-zinc-50">
+                <VercelIcon />
+                <span>+</span>
+                <AttachmentIcon />
+              </p>
+              <p>
+                The useChat hook supports sending attachments along with
+                messages as well as rendering previews on the client. This can
+                be useful for building applications that involve sending images,
+                files, and other media content to the AI provider.
+              </p>
+              <p>
+                {" "}
+                Learn more about the{" "}
+                <Link
+                  className="text-blue-500 dark:text-blue-400"
+                  href="https://sdk.vercel.ai/docs/ai-sdk-ui/chatbot#attachments-experimental"
+                  target="_blank"
+                >
+                  useChat{" "}
+                </Link>
+                hook from Vercel AI SDK.
+              </p>
+            </div>
+          </motion.div>
+        )}
+
+        <form
+          className="flex flex-col gap-2 relative items-center"
+          onSubmit={(event) => {
+            const options = files ? { experimental_attachments: files } : {};
+            handleSubmit(event, options);
+            setFiles(null);
+          }}
+        >
+          <AnimatePresence>
+            {files && files.length > 0 && (
+              <div className="flex flex-row gap-2 absolute bottom-12 px-4 w-full md:w-[500px] md:px-0">
+                {Array.from(files).map((file) =>
+                  file.type.startsWith("image") ? (
+                    <div key={file.name}>
+                      <motion.img
+                        src={URL.createObjectURL(file)}
+                        alt={file.name}
+                        className="rounded-md w-16"
+                        initial={{ scale: 0.8, opacity: 0 }}
+                        animate={{ scale: 1, opacity: 1 }}
+                        exit={{
+                          y: -10,
+                          scale: 1.1,
+                          opacity: 0,
+                          transition: { duration: 0.2 },
+                        }}
+                      />
+                    </div>
+                  ) : file.type.startsWith("text") ? (
+                    <motion.div
+                      key={file.name}
+                      className="text-[8px] leading-1 w-28 h-16 overflow-hidden text-zinc-500 border p-2 rounded-lg bg-white dark:bg-zinc-800 dark:border-zinc-700 dark:text-zinc-400"
+                      initial={{ scale: 0.8, opacity: 0 }}
+                      animate={{ scale: 1, opacity: 1 }}
+                      exit={{
+                        y: -10,
+                        scale: 1.1,
+                        opacity: 0,
+                        transition: { duration: 0.2 },
+                      }}
+                    >
+                      <TextFilePreview file={file} />
+                    </motion.div>
+                  ) : null
+                )}
+              </div>
+            )}
+          </AnimatePresence>
+
+          {/* Hidden file input */}
+          <input
+            type="file"
+            multiple
+            accept="image/*,text/*"
+            ref={fileInputRef}
+            className="hidden"
+            onChange={handleFileChange}
+          />
+
+          <div className="flex items-center w-full md:max-w-[500px] max-w-[calc(100dvw-32px)] bg-zinc-100 dark:bg-zinc-700 rounded-md px-4 py-2">
+            {/* Upload Button */}
+            <button
+              type="button"
+              onClick={handleUploadClick}
+              className="text-zinc-500 dark:text-zinc-300 hover:text-zinc-700 dark:hover:text-zinc-100 focus:outline-none mr-3"
+              aria-label="Upload Files"
+            >
+              <span className="w-5 h-5">
+                <AttachmentIcon aria-hidden="true" />
+              </span>
+            </button>
+
+            {/* Message Input */}
+            <input
+              ref={inputRef}
+              className="bg-transparent flex-grow outline-none text-zinc-800 dark:text-zinc-300 placeholder-zinc-400"
+              placeholder="Send a message..."
+              value={input}
+              onChange={handleInputChange}
+              onPaste={handlePaste}
             />
-            Deploy now
-          </a>
-          <a
-            className="rounded-full border border-solid border-black/[.08] dark:border-white/[.145] transition-colors flex items-center justify-center hover:bg-[#f2f2f2] dark:hover:bg-[#1a1a1a] hover:border-transparent text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 sm:min-w-44"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Read our docs
-          </a>
-        </div>
-      </main>
-      <footer className="row-start-3 flex gap-6 flex-wrap items-center justify-center">
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/file.svg"
-            alt="File icon"
-            width={16}
-            height={16}
-          />
-          Learn
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/window.svg"
-            alt="Window icon"
-            width={16}
-            height={16}
-          />
-          Examples
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/globe.svg"
-            alt="Globe icon"
-            width={16}
-            height={16}
-          />
-          Go to nextjs.org →
-        </a>
-      </footer>
+          </div>
+        </form>
+      </div>
     </div>
   );
 }
