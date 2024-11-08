@@ -4,7 +4,6 @@ import { useEffect, useState } from 'react'
 import { motion } from 'framer-motion'
 import { BotIcon, UserIcon } from '@/components/custom/icons'
 import { Markdown } from '@/components/custom/markdown'
-import { useRouter } from 'next/navigation'
 import { Button } from '@/components/ui/button'
 import { ArrowLeft } from 'lucide-react'
 import { redirect } from 'next/navigation'
@@ -19,10 +18,9 @@ const fetchDataFromBackend = async (query: string) => {
   }
 }
 
-export default function Component({ query = 'I want to buy Macbook Air M2 chip 512GB for $2000, is it a reasonable price for such product?' }: { query?: string }) {
+export default function Page({ query = 'I want to buy Macbook Air M2 chip 512GB for $2000, is it a reasonable price for such product?' }: { query: string }) {
   const [data, setData] = useState<{ query: string; response: string } | null>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const router = useRouter()
 
   useEffect(() => {
     const fetchData = async () => {
