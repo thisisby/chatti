@@ -318,7 +318,7 @@ export default function Home() {
             )}
           </AnimatePresence>
 
-          {/* Hidden file input */}
+
           <input
             type="file"
             multiple
@@ -341,7 +341,7 @@ export default function Home() {
               </span>
             </button>
 
-            {/* Message Input */}
+
             <input
               ref={inputRef}
               className="bg-transparent flex-grow outline-none text-zinc-800 dark:text-zinc-300 placeholder-zinc-400 pr-[7px] sm:pr-0"
@@ -349,11 +349,6 @@ export default function Home() {
               value={input}
               onChange={handleInputChange}
               onPaste={handlePaste}
-              onKeyDown={(event) => {
-                if (event.key === "Enter") {
-                  inputRef.current?.blur(); // Close keyboard when Return is pressed
-                }
-              }}
             />
            <button className='sm:hidden' type='submit'> <ArrowUpIcon /></button>
           </div>
