@@ -9,6 +9,8 @@ import {
   UserIcon,
   VercelIcon,
 } from "@/components/custom/icons";
+import { useRouter } from 'next/navigation';
+
 import { useChat } from "ai/react";
 import { DragEvent, useEffect, useRef, useState, FormEvent } from "react";
 import { AnimatePresence, motion } from "framer-motion";
@@ -55,12 +57,15 @@ export default function Home() {
         toast.error("You've been rate limited, please try again later!"),
     });
 
+    
+
   const [files, setFiles] = useState<FileList | null>(null);
   const inputRef = useRef<HTMLInputElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null); // Reference for the hidden file input
   const [isDragging, setIsDragging] = useState(false);
   const [isLoadingg, setIsLoadingg] = useState(false);
   const [trigger, setTrigger] = useState(false);
+  const router = useRouter();
 
   const handlePaste = (event: React.ClipboardEvent) => {
     const items = event.clipboardData?.items;
@@ -155,15 +160,44 @@ export default function Home() {
   };
 
 
-  const handleSubmitt = (event: FormEvent, options: FileOptions) => {
+  const handleSubmitt = async (event: FormEvent, options: FileOptions) => {
     event.preventDefault();
     setTrigger(true)
     setIsLoadingg(true)
 
-    setTimeout(() => {
-      setIsLoadingg(false)
-      redirect("/reports/1")
-    }, 3000)
+    try {
+      // Get the input data to send (e.g., messages or input text)
+      const inputData = input; // Adjust as needed to collect the right data
+  
+      // Send the POST request to the API
+      const response = await fetch("https://api-uca-team.jprq.site/validate_from_description/", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ description: inputData }), // Adjust the payload as needed
+      });
+  
+      if (!response.ok) {
+        throw new Error("Network response was not ok");
+      }
+
+      const uniqueKey = `report_${Date.now()}`;
+  
+      // Get response data and save it to localStorage
+      const result = await response.json();
+         localStorage.setItem(uniqueKey, JSON.stringify(result));
+         router.push(`/reports/${uniqueKey}`);
+
+      console.log(result)
+  
+      // Redirect to the report page
+      redirect("/reports/1");
+    } catch (error) {
+      toast.error("Failed to submit data. Please try again.");
+    } finally {
+      setIsLoadingg(false);
+    }
 
   
   }

@@ -1,50 +1,36 @@
 'use client'
 
-import { useEffect, useState } from 'react'
-import { motion } from 'framer-motion'
-import { BotIcon, UserIcon } from '@/components/custom/icons'
-import { Markdown } from '@/components/custom/markdown'
-import { Button } from '@/components/ui/button'
-import { ArrowLeft } from 'lucide-react'
-import { redirect, useParams } from 'next/navigation'
-
-// Mock function to simulate fetching data from the backend
-const fetchDataFromBackend = async (query: string) => {
-  // Simulate API call delay
-  await new Promise(resolve => setTimeout(resolve, 1000))
-  return {
-    query,
-    response: `This is a mock response for the query: "${query}". In a real application, this data would come from your backend API.`
-  }
-}
+import { useEffect, useState } from 'react';
+import { motion } from 'framer-motion';
+import { BotIcon, UserIcon } from '@/components/custom/icons';
+import { Markdown } from '@/components/custom/markdown';
+import { Button } from '@/components/ui/button';
+import { ArrowLeft } from 'lucide-react';
+import { useParams, useRouter } from 'next/navigation';
 
 export default function Page() {
-  const { slug } = useParams() // Now, slug is a Promise
-  let query = slug || 'Default query' // Default value for fallback
-
-  if (Array.isArray(query)) {
-    query = query[0]
-  }
-
-  const [data, setData] = useState<{ query: string; response: string } | null>(null)
-  const [isLoading, setIsLoading] = useState(true)
+  const { slug } = useParams(); // Match the unique key passed in the URL
+  const [reportData, setReportData] = useState(null);
+  const [isLoading, setIsLoading] = useState(true);
+  const router = useRouter();
 
   useEffect(() => {
-    const fetchData = async () => {
-      setIsLoading(true)
-      const result = await fetchDataFromBackend(query)
-      setData(result)
-      setIsLoading(false)
-    }
-
     if (slug) {
-      fetchData()
+      const storedData = localStorage.getItem(slug); // Get the report data by unique key
+      if (storedData) {
+        setReportData(JSON.parse(storedData));
+      } else {
+        console.error('No report found for this key');
+      }
+      setIsLoading(false);
     }
-  }, [query, slug])
+  }, [slug]);
+
+  if (isLoading) return <p>Loading report...</p>;
 
   const handleGoBack = () => {
-    redirect('/')
-  }
+    router.push('/');
+  };
 
   return (
     <div className="flex flex-col items-center pb-10 min-h-dvh bg-white dark:bg-zinc-900 relative">
@@ -59,16 +45,7 @@ export default function Page() {
         </Button>
       </div>
       <div className="flex flex-col gap-16 w-full max-w-[500px] px-4">
-        {isLoading ? (
-          <div className="flex flex-row gap-2 w-full">
-            <div className="size-[24px] flex flex-col justify-center items-center flex-shrink-0 text-zinc-400">
-              <BotIcon />
-            </div>
-            <div className="flex flex-col gap-1 text-zinc-400">
-              <div>Loading...</div>
-            </div>
-          </div>
-        ) : data ? (
+        {reportData ? (
           <>
             <motion.div
               className="flex flex-row gap-2 w-full"
@@ -80,7 +57,7 @@ export default function Page() {
               </div>
               <div className="flex flex-col gap-1">
                 <div className="text-zinc-800 dark:text-zinc-300">
-                  {data.query}
+                  {reportData.query}
                 </div>
               </div>
             </motion.div>
@@ -94,7 +71,7 @@ export default function Page() {
               </div>
               <div className="flex flex-col gap-1">
                 <div className="text-zinc-800 dark:text-zinc-300 flex flex-col gap-4">
-                  <Markdown>{data.response}</Markdown>
+                  <Markdown>{reportData.reasoning}</Markdown>
                 </div>
               </div>
             </motion.div>
@@ -104,5 +81,5 @@ export default function Page() {
         )}
       </div>
     </div>
-  )
+  );
 }
