@@ -48,7 +48,7 @@ export default function Home() {
 
   
 
-  const { messages, input, handleSubmist, handleInputChange, isLoadingg } =
+  const { messages, input, handleSubmit, handleInputChange, isLoading } =
     useChat({
       onError: () =>
         toast.error("You've been rate limited, please try again later!"),
@@ -58,7 +58,7 @@ export default function Home() {
   const inputRef = useRef<HTMLInputElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null); // Reference for the hidden file input
   const [isDragging, setIsDragging] = useState(false);
-  const [isLoading, setIsLoading] = useState(false);
+  const [isLoadingg, setIsLoadingg] = useState(false);
   const [trigger, setTrigger] = useState(false);
 
   const handlePaste = (event: React.ClipboardEvent) => {
@@ -154,13 +154,13 @@ export default function Home() {
   };
 
 
-  const handleSubmit = (event: FormEvent, options: FileOptions) => {
+  const handleSubmitt = (event: FormEvent, options: FileOptions) => {
     event.preventDefault();
     setTrigger(true)
-    setIsLoading(true)
+    setIsLoadingg(true)
 
     setTimeout(() => {
-      setIsLoading(false)
+      setIsLoadingg(false)
     }, 3000)
 
     redirect("/reports/1")
@@ -224,7 +224,7 @@ export default function Home() {
               </motion.div>
             ))}
 
-            {isLoading && (
+            {isLoadingg && (
               <div className="flex flex-row gap-2 px-4 w-full md:w-[500px] md:px-0 pt-20">
                 <div className="size-[24px] flex flex-col justify-center items-center flex-shrink-0 text-zinc-400">
                   <BotIcon />
@@ -271,7 +271,7 @@ export default function Home() {
           className="flex flex-col gap-2 relative items-center"
           onSubmit={(event) => {
             const options = files ? { experimental_attachments: files } : {};
-            handleSubmit(event, options);
+            handleSubmitt(event, options);
             setFiles(null);
           }}
         >
