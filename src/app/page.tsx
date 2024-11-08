@@ -3,6 +3,7 @@
 import { redirect } from 'next/navigation'
 
 import {
+  ArrowUpIcon,
   AttachmentIcon,
   BotIcon,
   UserIcon,
@@ -343,12 +344,13 @@ export default function Home() {
             {/* Message Input */}
             <input
               ref={inputRef}
-              className="bg-transparent flex-grow outline-none text-zinc-800 dark:text-zinc-300 placeholder-zinc-400"
+              className="bg-transparent flex-grow outline-none text-zinc-800 dark:text-zinc-300 placeholder-zinc-400 pr-[7px] sm:pr-0"
               placeholder="Send a message..."
               value={input}
               onChange={handleInputChange}
               onPaste={handlePaste}
             />
+           <button className='sm:hidden' type='submit'> <ArrowUpIcon /></button>
           </div>
         </form>
       </div>
