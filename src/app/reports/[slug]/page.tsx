@@ -20,7 +20,11 @@ const fetchDataFromBackend = async (query: string) => {
 
 export default function Page() {
   const { slug } = useParams() // Now, slug is a Promise
-  const query = slug || 'Default query' // Default value for fallback
+  let query = slug || 'Default query' // Default value for fallback
+
+  if (Array.isArray(query)) {
+    query = query[0]
+  }
 
   const [data, setData] = useState<{ query: string; response: string } | null>(null)
   const [isLoading, setIsLoading] = useState(true)
