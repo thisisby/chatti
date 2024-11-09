@@ -49,7 +49,7 @@ function TextFilePreview({ file }: { file: File }) {
 
 export default function Home() {
 
-  
+  const [reports, setReports] = useState([]);
 
   const { messages, input, handleSubmit, handleInputChange, isLoading } =
     useChat({
@@ -135,6 +135,19 @@ export default function Home() {
     scrollToBottom();
   }, [messages]);
 
+  useEffect(() => {
+    const storedReports = [];
+    // Loop through localStorage to get report keys and data
+    for (let i = 0; i < localStorage.length; i++) {
+      const key = localStorage.key(i);
+      if (key && key.startsWith('report_')) { // Assumes report keys have a 'report_' prefix
+        const reportData = JSON.parse(localStorage.getItem(key));
+        storedReports.push({ key, data: reportData });
+      }
+    }
+    setReports(storedReports);
+  }, []);
+
   // Function to handle file selection via the upload button
   const handleUploadClick = () => {
     fileInputRef.current?.click();
@@ -202,6 +215,10 @@ export default function Home() {
   
   }
 
+  const handleViewReport = (key) => {
+    router.push(`/reports/${key}`); // Navigates to the unique report page
+  };
+
   return (
     <div
       className="flex flex-row justify-center pb-10 h-dvh bg-white dark:bg-zinc-900 relative"
@@ -210,8 +227,26 @@ export default function Home() {
       onDrop={handleDrop}
     >
 
-      <div className="absolute left-10 top-16">
 
+
+      <div className="absolute left-10 top-16">
+        <b className='text-sm mb-4 block'>Reports:</b>
+      {reports.length > 0 ? (
+        <ul className="w-full max-w-[500px] space-y-4">
+          {reports.map((report) => (
+            <li key={report.key} className="underline cursor-pointer"  onClick={() => handleViewReport(report.key)}>
+              <div className="flex justify-between items-center">
+                <span className="text-gray-800 dark:text-zinc-200 text-sm">
+                  {report.data.title || `${report.key}`}
+                </span>
+        
+              </div>
+            </li>
+          ))}
+        </ul>
+      ) : (
+        <p className="text-gray-600 dark:text-zinc-300">No reports available.</p>
+      )}
       </div>
       <AnimatePresence>
         {isDragging && (

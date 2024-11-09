@@ -57,7 +57,7 @@ export default function Page() {
               </div>
               <div className="flex flex-col gap-1">
                 <div className="text-zinc-800 dark:text-zinc-300">
-                  {reportData.query}
+                  {reportData?.original_query}
                 </div>
               </div>
             </motion.div>
@@ -71,7 +71,18 @@ export default function Page() {
               </div>
               <div className="flex flex-col gap-1">
                 <div className="text-zinc-800 dark:text-zinc-300 flex flex-col gap-4">
-                  <Markdown>{reportData.reasoning}</Markdown>
+                  <Markdown>{reportData?.reasoning}</Markdown>
+
+                  <hr />
+                 <b>Мы анализировали эти товары:</b>
+
+                  <ul>
+                    {reportData?.similar_items?.slice(0, 7).map((item, idx) => (
+                      <li className='mb-1' key={idx}>
+                        <a className='underline' href={item.source_url} target='_blank'>{item.item_name}</a>  - <b>{item.price}</b>с
+                      </li>
+                    ))}
+                  </ul>
                 </div>
               </div>
             </motion.div>
