@@ -409,10 +409,11 @@ export default function Home() {
             />
            <button className='sm:hidden' type='submit'> <ArrowUpIcon /></button>
           </div>
-        </form>
-      </div>
+        <a className='text-xs mt-2 underline text-blue-500' href="https://api-uca-team.jprq.site/docs">Link to API</a>
 
-      <a href="https://api-uca-team.jprq.site/docs">Link to API</a>
+        </form>
+
+      </div>     
     </div>
   );
 }
