@@ -7,7 +7,6 @@ import {
   ArrowUpIcon,
   AttachmentIcon,
   BotIcon,
-  UserIcon,
   VercelIcon,
 } from "@/components/custom/icons";
 import { useRouter } from 'next/navigation';
@@ -16,17 +15,12 @@ import { useChat } from "ai/react";
 import { DragEvent, useEffect, useRef, useState, FormEvent } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import { toast } from "sonner";
-import Link from "next/link";
 import { Markdown } from "@/components/custom/markdown";
 
 type FileOptions = {
   experimental_attachments?: FileList | null;
 };
 
-const getTextFromDataUrl = (dataUrl: string) => {
-  const base64 = dataUrl.split(",")[1];
-  return window.atob(base64);
-};
 
 function TextFilePreview({ file }: { file: File }) {
   const [content, setContent] = useState<string>("");
@@ -143,10 +137,8 @@ export default function Home() {
     for (let i = 0; i < localStorage.length; i++) {
       const key = localStorage.key(i);
       if (key && key.startsWith('report_')) { // Assumes report keys have a 'report_' prefix
-        let reportData = JSON.parse(localStorage.getItem(key));
-        if (reportData == null) {
-          reportData = {"message":"No similar items found with the specified similarity threshold and country filter."}
-        }
+        const reportData = JSON.parse(localStorage.getItem(key) || "{}");
+    
         storedReports.push({ key, data: reportData });
       }
     }
