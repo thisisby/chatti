@@ -142,7 +142,10 @@ export default function Home() {
     for (let i = 0; i < localStorage.length; i++) {
       const key = localStorage.key(i);
       if (key && key.startsWith('report_')) { // Assumes report keys have a 'report_' prefix
-        const reportData = JSON.parse(localStorage.getItem(key));
+        let reportData = JSON.parse(localStorage.getItem(key));
+        if (reportData == null) {
+          reportData = {"message":"No similar items found with the specified similarity threshold and country filter."}
+        }
         storedReports.push({ key, data: reportData });
       }
     }
@@ -318,12 +321,12 @@ export default function Home() {
                 <AttachmentIcon />
               </p>
               <p>
-                The Chat can help you verify the prices of certain products for valid and correct price rate in the market.
-                It's very easy to use it. Write the description of the product, price, and the country of sale.
+              Чат может помочь вам сверить цены на определенные товары с действительными и правильными рыночными ценами.
+              Им очень просто пользоваться. Напишите описание товара, цену и страну продажи.
               </p>
               <p>
                 {" "}
-                Ex. "I want to buy Monitor HP32 for 38000 in Russia"
+                Пр. "Мне предлагают купить Блок питания 750W DeepCool DQ750-M-V2L Gold в России по цене 45000 руб. стоит ли мне прнимать такю сделку?"
              
               </p>
             </div>
