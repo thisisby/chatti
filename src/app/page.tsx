@@ -411,6 +411,8 @@ export default function Home() {
           </div>
         </form>
       </div>
+
+      <a href="https://api-uca-team.jprq.site/docs">Link to API</a>
     </div>
   );
 }
