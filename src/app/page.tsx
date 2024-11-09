@@ -66,6 +66,7 @@ export default function Home() {
   const [isLoadingg, setIsLoadingg] = useState(false);
   const [trigger, setTrigger] = useState(false);
   const router = useRouter();
+  const [open, isOpen] = useState(false);
 
   const handlePaste = (event: React.ClipboardEvent) => {
     const items = event.clipboardData?.items;
@@ -227,9 +228,9 @@ export default function Home() {
       onDrop={handleDrop}
     >
 
+    <button onClick={() => isOpen(!open)} className={`fixed top-3 ${open ? "left-[200px]" : "left-3"} duration-150 bg-black text-white px-2 py-1 rounded-lg md:hidden`}>{open ? "Close" : "Menu"}</button>
 
-
-      <div className="absolute left-10 top-16">
+      <div className={`absolute md:left-10 md:top-16 top-0 pt-6 px-6 bg-white h-screen duration-150 md:h-auto ${open ? "left-0" : "-left-[100%]"}`}>
         <b className='text-sm mb-4 block'>Reports:</b>
       {reports.length > 0 ? (
         <ul className="w-full max-w-[500px] space-y-4">
@@ -317,22 +318,13 @@ export default function Home() {
                 <AttachmentIcon />
               </p>
               <p>
-                The useChat hook supports sending attachments along with
-                messages as well as rendering previews on the client. This can
-                be useful for building applications that involve sending images,
-                files, and other media content to the AI provider.
+                The Chat can help you verify the prices of certain products for valid and correct price rate in the market.
+                It's very easy to use it. Write the description of the product, price, and the country of sale.
               </p>
               <p>
                 {" "}
-                Learn more about the{" "}
-                <Link
-                  className="text-blue-500 dark:text-blue-400"
-                  href="https://sdk.vercel.ai/docs/ai-sdk-ui/chatbot#attachments-experimental"
-                  target="_blank"
-                >
-                  useChat{" "}
-                </Link>
-                hook from Vercel AI SDK.
+                Ex. "I want to buy Monitor HP32 for 38000 in Russia"
+             
               </p>
             </div>
           </motion.div>

@@ -45,7 +45,7 @@ export default function Page() {
         </Button>
       </div>
       <div className="flex flex-col gap-16 w-full max-w-[500px] px-4">
-        {reportData ? (
+        {reportData && reportData.message != "No similar items found with the specified similarity threshold and country filter." ? (
           <>
             <motion.div
               className="flex flex-row gap-2 w-full"
@@ -88,7 +88,7 @@ export default function Page() {
             </motion.div>
           </>
         ) : (
-          <div className="text-zinc-800 dark:text-zinc-300">No data available</div>
+          <div className="text-zinc-800 dark:text-zinc-300">Oops we do not have data to analyze this product yet 😓</div>
         )}
       </div>
     </div>
