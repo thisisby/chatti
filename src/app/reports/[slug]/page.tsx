@@ -71,7 +71,7 @@ export default function Page() {
               </div>
               <div className="flex flex-col gap-1">
                 <div className="text-zinc-800 dark:text-zinc-300 flex flex-col gap-4">
-                  <Markdown>{reportData?.reasoning}</Markdown>
+                  <Markdown>{reportData?.reasoning.replaceAll("$", "")}</Markdown>
 
                   <hr />
                  <b>Мы анализировали эти товары:</b>
