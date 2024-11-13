@@ -180,7 +180,7 @@ export default function Home() {
       const inputData = input; // Adjust as needed to collect the right data
   
       // Send the POST request to the API
-      const response = await fetch("https://api-uca-team.jprq.site/validate_from_description/", {
+      const response = await fetch("https://api-uca-team.tunnels-dev.io.systems/validate_from_description/", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -409,7 +409,7 @@ export default function Home() {
             />
            <button className='sm:hidden' type='submit'> <ArrowUpIcon /></button>
           </div>
-        <a className='text-xs mt-2 underline text-blue-500' href="https://api-uca-team.jprq.site/docs">Link to API</a>
+        <a className='text-xs mt-2 underline text-blue-500' href="https://api-uca-team.tunnels-dev.io.systems/docs#/">Link to API</a>
 
         </form>
 
